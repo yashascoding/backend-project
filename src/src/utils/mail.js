@@ -26,7 +26,7 @@ import nodemailer from "nodemailer";
     const mail={
         from:"mail.taskmanager@example.com",
         to:options.email,
-        subject:options.subject,,
+        subject:options.subject,
         text:emailTextual,
         html:emailhtml
     }
