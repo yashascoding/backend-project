@@ -1,8 +1,8 @@
 import {User} from "../models/user.model.js";
-import {Apiresponse} from "../utils/apiresponse.js";
+import { ApiResponse } from "../utils/apiresponse.js";
 import {ApiError} from "../utils/api-error.js";
 import {asyncHandler} from "../utils/async-handler.js";
-import {emailVerificationMailgenContent, SendMail} from "../utils/mail.js"
+import { emailVerificationMailgenContent, SendMail } from "../utils/mail.js";
 
 const generateAccessAndRefreshTokens=async(userId)=>{
     try{
@@ -20,7 +20,7 @@ const generateAccessAndRefreshTokens=async(userId)=>{
     }
 }
 
-const registerUser=asyncHandler(async(req,res)=>{
+const Registeruser=asyncHandler(async(req,res)=>{
     const{email,username,password,role}=req.body;
 
    const existedUser =User.findOne({
@@ -50,10 +50,23 @@ const registerUser=asyncHandler(async(req,res)=>{
         {
             email:user?.email,
             subject:"please verify your email",
-            mailgenContent:emailVerificationMailgenContent
+            mailgenContent:emailVerificationMailgenContent(
+                user.username,
+                `${req.protocol}://${req.get("host")}/api/v1/user/verify-email/${UnhashedToken}`,
+            ),
         }
     );
 
+await User.findById(user._id).select("-password-refresh-emailVerificationToken-emailVerificationExpiry",)
 
-
+if(!createdUser)
+{
+    throw  new ApiError(500,"Something went wrong while registering the user ")
+}
+        return res.status(201),json(
+            new ApiResponse(200,{user:createdUser} ,
+            "User registered succesfully and verification ")
+        )
 })
+
+export {Registeruser};
